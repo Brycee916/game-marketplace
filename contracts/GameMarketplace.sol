@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 contract GameMarketplace {
@@ -6,17 +5,24 @@ contract GameMarketplace {
         uint id;
         string title;
         uint price;
-        string description; // Add description
-        string image;       // Add image URL
-        bool exists;        // To check if the game exists
-        address owner;      // Tracks the current owner of the game
+        string description;
+        string image; // Add image URL
+        bool exists;  // To check if the game exists
+        address developer; // Tracks the developer of the game
+    }
+
+    struct Transaction {
+        uint gameId;
+        address buyer;
+        uint timestamp;
     }
 
     mapping(uint => Game) public games;
+    mapping(address => Transaction[]) public userTransactions;
     uint public gameCount;
 
     event GameAdded(uint gameId, string title, address developer);
-    event GamePurchased(uint gameId, address buyer);
+    event GamePurchased(uint gameId, address buyer, uint price);
 
     // Add a new game to the marketplace
     function addGame(
@@ -31,44 +37,38 @@ contract GameMarketplace {
         emit GameAdded(gameCount, title, msg.sender);
     }
 
-    // Purchase a game from the marketplace
     function purchaseGame(uint gameId) public payable {
         Game storage game = games[gameId];
 
-        // Check if the game exists
         require(game.exists, "Game does not exist");
-
-        // Check if the correct amount of Ether is sent
         require(msg.value == game.price, "Incorrect price sent");
 
-        // Transfer the Ether to the game's owner
-        payable(game.owner).transfer(msg.value);
+        payable(game.developer).transfer(msg.value);
 
-        // Update game ownership to the buyer
-        game.owner = msg.sender;
+        userTransactions[msg.sender].push(
+            Transaction(gameId, msg.sender, block.timestamp)
+        );
 
-        // Emit the event to notify the purchase
-        emit GamePurchased(gameId, msg.sender);
+        emit GamePurchased(gameId, msg.sender, msg.value);
     }
 
-    // Get the details of a specific game by its ID
-    function getGame(uint gameId)
+    // Fetch user transactions
+    function getUserTransactions(address user)
         public
         view
-        returns (
-            string memory title,
-            uint price,
-            string memory description,
-            string memory image,
-            address owner
-        )
+        returns (Transaction[] memory)
     {
-        Game memory game = games[gameId];
+        return userTransactions[user];
+    }
 
-        // Ensure the game exists
-        require(game.exists, "Game does not exist");
-
-        return (game.title, game.price, game.description, game.image, game.owner);
+    // Fetch game by ID
+    function getGameById(uint gameId)
+        public
+        view
+        returns (Game memory)
+    {
+        require(games[gameId].exists, "Game does not exist");
+        return games[gameId];
     }
 
     // Get all games in the marketplace
@@ -82,11 +82,6 @@ contract GameMarketplace {
             allGames[i - 1] = games[i];
         }
         return allGames;
-    }
-
-    // Function to get the contract owner's address
-    function contractOwner() public pure returns (address) {
-        return address(0x3BdEF492279A93496bc8D27EF9C49C2bE56ca2b0); // Replace with actual address
     }
 }
 

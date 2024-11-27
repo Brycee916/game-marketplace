@@ -1,38 +1,29 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../components/Navbar"; // Import Navbar component
-import contractABI from "../contracts/GameMarketplace.json"; // Adjust path if needed
+import Navbar from "../components/Navbar";
+import contractABI from "../contracts/GameMarketplace.json";
 import { ethers } from "ethers";
 
-const contractAddress = "0xf2885Ab529Ec54E787e1d5A6CdE9AC5D4417142F"; // Replace with the new deployed address
+const contractAddress = "0x6DBa90e8166fbA73ac66CCe38F814cf6E5350B44";
 
 const UserHome = () => {
   const [games, setGames] = useState([]);
+  const [purchasedGames, setPurchasedGames] = useState([]);
   const [search, setSearch] = useState("");
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [marketplaceContract, setMarketplaceContract] = useState(null);
 
-    useEffect(() => {
-        if (marketplaceContract) {
-          fetchGames();
-        }
-    }, [marketplaceContract]);
-
   useEffect(() => {
     const setupProviderAndContract = async () => {
       if (window.ethereum) {
-        // Create a provider
         const newProvider = new ethers.providers.Web3Provider(window.ethereum);
         setProvider(newProvider);
 
-        // Request account access
         await window.ethereum.request({ method: "eth_requestAccounts" });
 
-        // Get signer from provider
         const newSigner = newProvider.getSigner();
         setSigner(newSigner);
 
-        // Create contract instance
         const contract = new ethers.Contract(contractAddress, contractABI.abi, newSigner);
         setMarketplaceContract(contract);
       }
@@ -40,23 +31,42 @@ const UserHome = () => {
 
     setupProviderAndContract();
   }, []);
-  
-  const fetchGames = async () => {
-  if (!marketplaceContract) return;
 
-      try {
-	  const gameList = await marketplaceContract.getAllGames(); // Assuming `getGames` returns an array of games
-	  const formattedGames = gameList.map((game) => ({
-	      id: game.id.toNumber(),
-	      title: game.title,
-	      price: ethers.utils.formatEther(game.price), // Convert price from wei to ETH
-	      description: game.description,
-	      image: game.image,
-	  }));
-	  setGames(formattedGames);
-      } catch (error) {
-	  console.error("Error fetching games:", error);
-      }
+  useEffect(() => {
+    if (marketplaceContract && signer) {
+      fetchGames();
+      fetchPurchasedGames();
+    }
+  }, [marketplaceContract, signer]);
+
+  const fetchGames = async () => {
+    if (!marketplaceContract) return;
+
+    try {
+      const gameList = await marketplaceContract.getAllGames();
+      const formattedGames = gameList.map((game) => ({
+        id: game.id.toNumber(),
+        title: game.title,
+        price: ethers.utils.formatEther(game.price),
+        description: game.description,
+        image: game.image,
+      }));
+      setGames(formattedGames);
+    } catch (error) {
+      console.error("Error fetching games:", error);
+    }
+  };
+
+  const fetchPurchasedGames = async () => {
+    try {
+      const userAddress = await signer.getAddress();
+      const userTransactions = await marketplaceContract.getUserTransactions(userAddress);
+      
+      const purchasedGameIds = userTransactions.map((transaction) => transaction.gameId.toNumber());
+      setPurchasedGames(purchasedGameIds);
+    } catch (error) {
+      console.error("Error fetching purchased games:", error);
+    }
   };
 
   const handlePurchase = async (game) => {
@@ -66,13 +76,12 @@ const UserHome = () => {
     }
 
     try {
-      const gameId = game.id;
-      const price = ethers.utils.parseEther(game.price); // Convert price to wei
+      const price = ethers.utils.parseEther(game.price);
 
-      const tx = await marketplaceContract.purchaseGame(gameId, { value: price });
+      const tx = await marketplaceContract.purchaseGame(game.id, { value: price });
       await tx.wait();
       alert(`Successfully purchased ${game.title}!`);
-      fetchGames();
+      fetchPurchasedGames(); // Refresh purchased games after successful purchase
     } catch (error) {
       console.error("Error purchasing game:", error);
       alert("Transaction failed. Please try again.");
@@ -98,12 +107,12 @@ const UserHome = () => {
       fontSize: "16px",
     },
     gameList: {
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", 
-        gap: "15px", 
-        justifyContent: "center", 
-        width: "100%",
-        maxWidth: "1000px", 
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+      gap: "15px",
+      justifyContent: "center",
+      width: "100%",
+      maxWidth: "1000px",
     },
     gameCard: {
       backgroundColor: "#ffffff",
@@ -147,7 +156,7 @@ const UserHome = () => {
 
   return (
     <div style={styles.container}>
-      <Navbar /> 
+      <Navbar />
       <input
         style={styles.searchBar}
         type="text"
@@ -157,9 +166,8 @@ const UserHome = () => {
       />
       <div style={styles.gameList}>
         {games
-          .filter((game) =>
-            game.title.toLowerCase().includes(search.toLowerCase())
-          )
+          .filter((game) => !purchasedGames.includes(game.id)) // Exclude purchased games
+          .filter((game) => game.title.toLowerCase().includes(search.toLowerCase())) // Search filter
           .map((game) => (
             <div key={game.id} style={styles.gameCard}>
               <img
@@ -169,7 +177,7 @@ const UserHome = () => {
               />
               <h2 style={styles.gameTitle}>{game.title}</h2>
               <p style={styles.gameDescription}>{game.description}</p>
-              <p style={styles.gamePrice}>{game.price}</p>
+              <p style={styles.gamePrice}>{game.price} ETH</p>
               <button
                 style={styles.purchaseButton}
                 onClick={() => handlePurchase(game)}
@@ -184,3 +192,4 @@ const UserHome = () => {
 };
 
 export default UserHome;
+

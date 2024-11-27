@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import contractABI from "../contracts/GameMarketplace.json"; 
 import { ethers } from "ethers";
 
-const contractAddress = "0xf2885Ab529Ec54E787e1d5A6CdE9AC5D4417142F"; // Replace with new contract address
+const contractAddress = "0x6DBa90e8166fbA73ac66CCe38F814cf6E5350B44"; //replace this with new contract address
 
 const DeveloperHome = () => {
   const [walletAddress, setWalletAddress] = useState(null);
