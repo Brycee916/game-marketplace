@@ -88,3 +88,4 @@ const WalletIntegration = () => {
 };
 
 export default WalletIntegration;
+

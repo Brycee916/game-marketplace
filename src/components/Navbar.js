@@ -64,18 +64,6 @@ const Navbar = () => {
           Home
         </Link>
         <Link
-          to="/user/wallet"
-          style={styles.navbarLink}
-          onMouseOver={(e) =>
-            (e.target.style.backgroundColor = styles.navbarLinkHover.backgroundColor)
-          }
-          onMouseOut={(e) =>
-            (e.target.style.backgroundColor = "transparent")
-          }
-        >
-          Wallet
-        </Link>
-        <Link
           to="/user/profile"
           style={styles.navbarLink}
           onMouseOver={(e) =>
