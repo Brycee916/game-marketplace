@@ -1,9 +1,12 @@
 import React, { useState } from "react";
+import contractABI from "../contracts/GameMarketplace.json"; 
+import { ethers } from "ethers";
+
+const contractAddress = "0xf2885Ab529Ec54E787e1d5A6CdE9AC5D4417142F"; //replace this with new contract address
 
 const DeveloperHome = () => {
   const [walletAddress, setWalletAddress] = useState(null);
   const [error, setError] = useState("");
-
   const [game, setGame] = useState({
     title: "",
     price: 0,
@@ -12,6 +15,10 @@ const DeveloperHome = () => {
     developerAddress: "", // Add developer's Ethereum public address
   });
 
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const marketplaceContract = new ethers.Contract(contractAddress, contractABI.abi, signer);
+  
   const connectWallet = async (e) => {
     e.preventDefault();
     if (window.ethereum) {
@@ -45,13 +52,19 @@ const DeveloperHome = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setGame({ title: "", price: "", description: "", image: "", developerAddress: walletAddress });
-    console.log("Game Posted:", game);
-    alert(`Details of Game Posted for Sale:\nTitle: ${game.title}\nPrice: ${game.price} ETH`);
-    // Blockchain logic: send `game` object to your smart contract or backend
-    
+    //--
+    try {
+        const transaction = await marketplaceContract.addGame(game.title, ethers.utils.parseEther(game.price), game.description, game.image);
+        await transaction.wait();
+        alert(`Details of Game Posted for Sale:\nTitle: ${game.title}\nPrice: ${game.price} ETH`);
+        // Reset form fields after submission
+        setGame({title: "", price: 0, description: "", image: "", developerAddress: walletAddress,});
+    } catch (error) {
+        alert(`Error Posting Game: ${game.title}`);
+    }
+    //--
   };
 
   const styles = {

@@ -1,77 +1,82 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar"; // Import Navbar component
+import contractABI from "../contracts/GameMarketplace.json"; // Adjust path if needed
+import { ethers } from "ethers";
+
+const contractAddress = "0xf2885Ab529Ec54E787e1d5A6CdE9AC5D4417142F"; // Replace with the new deployed address
 
 const UserHome = () => {
   const [games, setGames] = useState([]);
   const [search, setSearch] = useState("");
+  const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
+  const [marketplaceContract, setMarketplaceContract] = useState(null);
+
+    useEffect(() => {
+        if (marketplaceContract) {
+          fetchGames();
+        }
+    }, [marketplaceContract]);
 
   useEffect(() => {
-    const fetchGames = async () => {
-      const gameList = [
-        {
-            id: 1,
-            title: "Grand Theft Auto VI",
-            price: "0.1 ETH",
-            description: "Coming Next Year",
-            image: "https://media-rockstargames-com.akamaized.net/mfe6/prod/__common/img/71d4d17edcd49703a5ea446cc0e588e6.jpg",
-        },
-        {
-            id: 2,
-            title: "Grand Theft Auto V",
-            price: "0.2 ETH",
-            description: "A thrilling Game experience.",
-            image: "https://wallpapers.com/images/featured/gta-5-qpjtjdxwbwrk4gyj.jpg",
-        },
-        {
-            id: 3,
-            title: "Call of Duty: Black Ops 6",
-            price: "0.1 ETH",
-            description: "Newest Call of Duty",
-            image: "https://imgs.callofduty.com/content/dam/atvi/callofduty/cod-touchui/blackops6/meta/BO6_LP-meta_image.jpg",
-        },
-        {
-            id: 4,
-            title: "Fortnite",
-            price: "0.2 ETH",
-            description: "Crank 90's, double pump",
-            image: "https://cdn1.epicgames.com/offer/fn/Blade_2560x1440_2560x1440-95718a8046a942675a0bc4d27560e2bb",
-        },
-        {
-            id: 5,
-            title: "Super Smash Bros",
-            price: "0.2 ETH",
-            description: "Mario, Luigi",
-            image: "https://assets.nintendo.com/image/upload/c_fill,w_1200/q_auto:best/f_auto/dpr_2.0/ncom/software/switch/70010000012332/ac4d1fc9824876ce756406f0525d50c57ded4b2a666f6dfe40a6ac5c3563fad9",
-        },
-        {
-            id: 6,
-            title: "Minecraft",
-            price: "0.2 ETH",
-            description: "Chemistry 101",
-            image: "https://i.pinimg.com/originals/2f/2f/77/2f2f77db59300fc7f48c6ad650790192.jpg",
-        },        {
-            id: 7,
-            title: "Fallout 4",
-            price: "0.1 ETH",
-            description: "Fallout 4 is a 2015 action role-playing game developed by Bethesda Game Studios and published by Bethesda Softworks.",
-            image: "https://image.api.playstation.com/vulcan/ap/rnd/202009/2502/rB3GRFvdPmaALiGt89ysflQ4.jpg",
-        },
-        {
-            id: 8,
-            title: "Red Dead Redemption 2",
-            price: "0.2 ETH",
-            description: "Cowboy",
-            image: "https://assets.xboxservices.com/assets/f2/09/f2093a9f-81ef-4ddd-9128-7e409ab3e6ad.jpg?n=Red-Dead-Redemption-II_GLP-Page-Hero-1084_1920x1080.jpg",
-        },  
-      ];
-      setGames(gameList);
-    };
-    fetchGames();
-  }, []);
+    const setupProviderAndContract = async () => {
+      if (window.ethereum) {
+        // Create a provider
+        const newProvider = new ethers.providers.Web3Provider(window.ethereum);
+        setProvider(newProvider);
 
-  const handlePurchase = (game) => {
-    console.log("Purchasing game with ID:", game.id);
-    alert(`Purchased ${game.title}\nPrice was ${game.price}`);
+        // Request account access
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+
+        // Get signer from provider
+        const newSigner = newProvider.getSigner();
+        setSigner(newSigner);
+
+        // Create contract instance
+        const contract = new ethers.Contract(contractAddress, contractABI.abi, newSigner);
+        setMarketplaceContract(contract);
+      }
+    };
+
+    setupProviderAndContract();
+  }, []);
+  
+  const fetchGames = async () => {
+  if (!marketplaceContract) return;
+
+      try {
+	  const gameList = await marketplaceContract.getAllGames(); // Assuming `getGames` returns an array of games
+	  const formattedGames = gameList.map((game) => ({
+	      id: game.id.toNumber(),
+	      title: game.title,
+	      price: ethers.utils.formatEther(game.price), // Convert price from wei to ETH
+	      description: game.description,
+	      image: game.image,
+	  }));
+	  setGames(formattedGames);
+      } catch (error) {
+	  console.error("Error fetching games:", error);
+      }
+  };
+
+  const handlePurchase = async (game) => {
+    if (!marketplaceContract || !signer) {
+      alert("Contract not initialized or need to connect wallet");
+      return;
+    }
+
+    try {
+      const gameId = game.id;
+      const price = ethers.utils.parseEther(game.price); // Convert price to wei
+
+      const tx = await marketplaceContract.purchaseGame(gameId, { value: price });
+      await tx.wait();
+      alert(`Successfully purchased ${game.title}!`);
+      fetchGames();
+    } catch (error) {
+      console.error("Error purchasing game:", error);
+      alert("Transaction failed. Please try again.");
+    }
   };
 
   const styles = {
