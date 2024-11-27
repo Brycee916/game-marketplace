@@ -108,21 +108,6 @@ const Profile = ({ userType, games }) => {
         Connect Wallet
       </button>
       {error && <p style={styles.error}>{error}</p>}
-      
-      {/* Games Section */}
-      <div style={styles.gamesContainer}>
-        <h2>Your {userType === "developer" ? "Posted Games" : "Purchased Games"}</h2>
-        {games && games.length > 0 ? (
-          games.map((game, index) => (
-            <div key={index} style={styles.gameTile}>
-              <p style={styles.gameTitle}>{game.title}</p>
-              <p style={styles.gameDescription}>{game.description}</p>
-            </div>
-          ))
-        ) : (
-          <p>No games available</p>
-        )}
-      </div>
     </div>
   );
 };
