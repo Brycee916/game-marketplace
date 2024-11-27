@@ -50,6 +50,42 @@ contract GameMarketplace {
         emit GameTransferred(gameId, previousOwner, msg.sender);
     }
 
+    // Refund a purchased game
+    function refundGame(uint gameId) public {
+    Game storage game = games[gameId];
+
+    // Ensure the game exists
+    require(game.exists, "Game does not exist");
+
+    // Ensure the caller owns the game
+    require(game.owner == msg.sender, "You are not the owner of this game");
+
+    // Ensure the game is not owned by the original creator (cannot refund free games)
+    address originalOwner = owner(); // The contract owner is assumed to be the original seller
+    require(game.owner != originalOwner, "Refund not applicable for this game");
+
+    // Emit debug information
+    emit DebugInfo(gameId, msg.sender, game.owner, originalOwner);
+
+    // Transfer the Ether back to the user
+    uint refundAmount = game.price;
+    payable(msg.sender).transfer(refundAmount);
+
+    // Reset the game's ownership to the original seller
+    game.owner = originalOwner;
+
+    // Update user game count
+    userGameCount[msg.sender]--;
+    userGameCount[originalOwner]++;
+
+    // Emit an event for the refund
+    emit GameTransferred(gameId, msg.sender, originalOwner);
+}
+
+// Debugging event
+event DebugInfo(uint gameId, address caller, address currentOwner, address originalOwner);
+
+
     // Transfer ownership of a game
     function transferGame(uint gameId, address newOwner) public {
         Game storage game = games[gameId];
