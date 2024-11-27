@@ -47,9 +47,9 @@ contract GameMarketplace {
         return (game.title, game.price);
     }
 
-    // Function to get the contract owner's address
+    // This could be the deployer's address or any specific address that you want to receive the funds
+    address private _owner = 0x8488Fc4d4f8bB35605ce1Ee0f5A1A6172F9106c0; // Replace with actual address
     function owner() public view returns (address) {
-        // This could be the deployer's address or any specific address that you want to receive the funds
-        return address(0x8488Fc4d4f8bB35605ce1Ee0f5A1A6172F9106c0); // Replace with actual address
+        return _owner;
     }
 }
