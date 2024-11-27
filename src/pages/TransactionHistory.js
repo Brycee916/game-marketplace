@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 
-const TransactionHistory = ({ transactions, userType }) => {
+const TransactionHistory = ({ userType, account, contract }) => {
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const styles = {
     container: {
       display: "flex",
@@ -49,16 +52,53 @@ const TransactionHistory = ({ transactions, userType }) => {
     },
   };
 
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      if (!contract || !account) return;
+
+      try {
+        // Fetch the user's library (game IDs) from the smart contract
+        const gameTitles = await contract.methods.getUserLibrary(account).call();
+
+        // Fetch details for each game from the contract
+        const transactionData = await Promise.all(
+          gameTitles.map(async (title) => {
+            const gameDetails = Object.values(
+              await contract.methods.getGame(title).call()
+            );
+
+            return {
+              title: gameDetails[0],
+              price: Web3.utils.fromWei(gameDetails[1], "ether"), // Convert price from wei to ETH
+              walletAddress: account,
+              date: new Date().toISOString(), // Placeholder for date (use logs for accurate timestamp if needed)
+            };
+          })
+        );
+
+        setTransactions(transactionData);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [contract, account]);
+
   return (
     <div style={styles.container}>
-        <Navbar />
+      <Navbar />
       <h1 style={styles.header}>
         {userType === "developer"
           ? "Developer Transaction History"
           : "User Transaction History"}
       </h1>
       <div style={styles.transactionContainer}>
-        {transactions && transactions.length > 0 ? (
+        {loading ? (
+          <p style={styles.noTransactions}>Loading transactions...</p>
+        ) : transactions.length > 0 ? (
           transactions.map((transaction, index) => (
             <div key={index} style={styles.transaction}>
               <p style={styles.transactionTitle}>{transaction.title}</p>
@@ -66,9 +106,6 @@ const TransactionHistory = ({ transactions, userType }) => {
                 {userType === "developer"
                   ? `Sold for ${transaction.price} ETH`
                   : `Purchased for ${transaction.price} ETH`}
-              </p>
-              <p style={styles.transactionDetails}>
-                Date: {new Date(transaction.date).toLocaleDateString()}
               </p>
               <p style={styles.transactionDetails}>
                 Wallet Address: {transaction.walletAddress}

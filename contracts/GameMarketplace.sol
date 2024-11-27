@@ -14,7 +14,7 @@ contract GameMarketplace {
     uint public gameCount;
     mapping(address => uint) public userGameCount; // Tracks the number of games owned by each user
 
-    event GamePurchased(uint gameId, address buyer);
+    event GamePurchased(uint gameId, address buyer, uint price, uint timestamp);
     event GameTransferred(uint gameId, address from, address to);
 
     // Add a new game to the marketplace
@@ -46,7 +46,7 @@ contract GameMarketplace {
         game.owner = msg.sender;
 
         // Emit the events to notify the purchase and ownership change
-        emit GamePurchased(gameId, msg.sender);
+        emit GamePurchased(gameId, msg.sender, game.price, block.timestamp);
         emit GameTransferred(gameId, previousOwner, msg.sender);
     }
 

@@ -62,7 +62,7 @@ const App = () => {
         <Route path="/developer/home" element={<DeveloperHome />} />
         <Route path="/user/wallet" element={<WalletIntegration />} />
         <Route path="/user/profile" element={<Profile userType="user" walletAddress="0x123..." games={[]} />} />
-        <Route path="/user/transaction-history" element={<TransactionHistory transactions={transactions} userType="user" />} />
+        <Route path="/user/transaction-history" element={<TransactionHistory userType="user" account={account} contract={contract} />} />
       </Routes>
     </Router>
   );
