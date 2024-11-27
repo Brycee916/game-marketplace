@@ -7,17 +7,19 @@ contract GameMarketplace {
         string title;
         uint price;
         bool exists; // To check if the game exists
+        address owner; // Tracks the current owner of the game
     }
 
     mapping(uint => Game) public games;
     uint public gameCount;
 
     event GamePurchased(uint gameId, address buyer);
+    event GameTransferred(uint gameId, address from, address to);
 
     // Add a new game to the marketplace
     function addGame(string memory title, uint price) public {
         gameCount++;
-        games[gameCount] = Game(gameCount, title, price, true);
+        games[gameCount] = Game(gameCount, title, price, true, msg.sender);
     }
 
     // Purchase a game from the marketplace
@@ -30,21 +32,44 @@ contract GameMarketplace {
         // Check if the correct amount of Ether is sent
         require(msg.value == game.price, "Incorrect price sent");
 
-        // Transfer the Ether to the contract's owner (or another address)
-        payable(owner()).transfer(msg.value);  // Ensure you have an owner() function or replace with a specific address
+        // Transfer the Ether to the game's owner
+        payable(game.owner).transfer(msg.value);
 
-        // Emit the event to notify the purchase
+        // Transfer ownership to the buyer
+        address previousOwner = game.owner;
+        game.owner = msg.sender;
+
+        // Emit the events to notify the purchase and ownership change
         emit GamePurchased(gameId, msg.sender);
+        emit GameTransferred(gameId, previousOwner, msg.sender);
+    }
+
+     // Transfer ownership of a game
+    function transferGame(uint gameId, address newOwner) public {
+        Game storage game = games[gameId];
+
+        // Ensure the game exists
+        require(game.exists, "Game does not exist");
+
+        // Check that the caller is the current owner
+        require(game.owner == msg.sender, "You are not the owner of this game");
+
+        // Update the game's owner
+        address previousOwner = game.owner;
+        game.owner = newOwner;
+
+        // Emit an event for the transfer
+        emit GameTransferred(gameId, previousOwner, newOwner);
     }
 
     // Get the details of a specific game by its ID
-    function getGame(uint gameId) public view returns (string memory, uint) {
+    function getGame(uint gameId) public view returns (string memory, uint, address) {
         Game memory game = games[gameId];
-        
+
         // Ensure the game exists
         require(game.exists, "Game does not exist");
-        
-        return (game.title, game.price);
+
+        return (game.title, game.price, game.owner);
     }
 
     // This could be the deployer's address or any specific address that you want to receive the funds
