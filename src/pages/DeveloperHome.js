@@ -1,12 +1,41 @@
 import React, { useState } from "react";
 
 const DeveloperHome = () => {
+  const [walletAddress, setWalletAddress] = useState(null);
+  const [error, setError] = useState("");
+
   const [game, setGame] = useState({
     title: "",
     price: "",
     description: "",
     image: "",
+    developerAddress: "", // Add developer's Ethereum public address
   });
+
+  const connectWallet = async (e) => {
+    e.preventDefault();
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        const address = accounts[0];
+        setWalletAddress(address);
+
+        // Update developerAddress in the game object
+        setGame((prevGame) => ({
+          ...prevGame,
+          developerAddress: address,
+        }));
+
+        setError("");
+      } catch (err) {
+        setError("Failed to connect wallet. Please try again.");
+      }
+    } else {
+      setError("MetaMask is not installed. Please install it to use this feature.");
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -18,9 +47,11 @@ const DeveloperHome = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setGame({ title: "", price: "", description: "", image: "", developerAddress: walletAddress });
     console.log("Game Posted:", game);
-    // Implement logic to interact with the blockchain or backend here
-    setGame({ title: "", price: "", description: "", image: "" });
+    alert(`Details of Game Posted for Sale:\nTitle: ${game.title}\nPrice: ${game.price} ETH`);
+    // Blockchain logic: send `game` object to your smart contract or backend
+    
   };
 
   const styles = {
@@ -63,6 +94,21 @@ const DeveloperHome = () => {
       cursor: "pointer",
       fontSize: "16px",
     },
+    button2: {
+      padding: "5px 10px",
+      backgroundColor: "#007bff",
+      color: "#ffffff",
+      border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+      fontSize: "14px",
+      marginBottom: "15px",
+    },
+    smallButton: {
+      fontSize: "14px",
+      padding: "5px 10px",
+      marginBottom: "15px",
+    },
     buttonHover: {
       backgroundColor: "#0056b3",
     },
@@ -71,6 +117,8 @@ const DeveloperHome = () => {
   return (
     <div style={styles.container}>
       <h1 style={styles.header}>Developer Home</h1>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      
       <form style={styles.form} onSubmit={handleSubmit}>
         <input
           style={styles.input}
@@ -108,12 +156,27 @@ const DeveloperHome = () => {
           onChange={handleInputChange}
           required
         />
+	<button
+	  style={{ ...styles.button2, ...styles.smallButton }}
+	  onClick={connectWallet}
+	  onMouseOver={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
+	  onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
+        >
+	  Get my wallet address
+        </button>
+        <input
+          style={styles.input}
+          type="text"
+          name="developerAddress"
+          placeholder="Your Ethereum Public Address"
+          value={game.developerAddress}
+          readOnly
+        />
         <button
           style={styles.button}
           type="submit"
           onMouseOver={(e) =>
-            (e.target.style.backgroundColor =
-              styles.buttonHover.backgroundColor)
+            (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)
           }
           onMouseOut={(e) =>
             (e.target.style.backgroundColor = styles.button.backgroundColor)
@@ -127,3 +190,5 @@ const DeveloperHome = () => {
 };
 
 export default DeveloperHome;
+
+
