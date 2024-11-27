@@ -6,7 +6,7 @@ const DeveloperHome = () => {
 
   const [game, setGame] = useState({
     title: "",
-    price: "",
+    price: 0,
     description: "",
     image: "",
     developerAddress: "", // Add developer's Ethereum public address
@@ -131,7 +131,9 @@ const DeveloperHome = () => {
         />
         <input
           style={styles.input}
-          type="text"
+          type="number"
+          min="0"
+          step="0.0001"
           name="price"
           placeholder="Price (in ETH)"
           value={game.price}
@@ -170,7 +172,7 @@ const DeveloperHome = () => {
           name="developerAddress"
           placeholder="Your Ethereum Public Address"
           value={game.developerAddress}
-          readOnly
+          required
         />
         <button
           style={styles.button}
