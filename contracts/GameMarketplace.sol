@@ -118,6 +118,24 @@ event DebugInfo(uint gameId, address caller, address currentOwner, address origi
         return (game.title, game.price, game.owner);
     }
 
+    // Function to transfer a game to another user
+    function transferGame(uint _gameId, address _newOwner) public {
+        // Ensure the new owner address is valid
+        require(_newOwner != address(0), "Invalid address");
+
+        // Retrieve the game from the mapping
+        Game storage game = games[_gameId];
+
+        // Ensure that the sender is the current owner
+        require(game.owner == msg.sender, "You are not the owner of this game");
+
+        // Transfer the game to the new owner
+        game.owner = _newOwner;
+
+        // Emit an event for the transfer
+        emit GameTransferred(_gameId, msg.sender, _newOwner);
+    }
+
     // List all game titles in a user's library
     function getUserLibrary(address user) public view returns (string[] memory) {
         uint userGameCounter = 0;
