@@ -6674,12 +6674,12 @@
     "1337": {
       "events": {},
       "links": {},
-      "address": "0x8d97962097E0822a966C9c59a08c6Feb3899E8c4",
-      "transactionHash": "0x24a3be15b4c1c8a0d12e92d916bb32c64525c170417c2b82cc4b5a579b456c25"
+      "address": "0x7d7A7856E12d9e2C7fA37aD6000909692F6DF96F",
+      "transactionHash": "0xfe879b75d8db3513a5a9a401ddef86ecc3c34c0df2ed9fcd3027eded810771df"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-11-27T03:00:14.472Z",
+  "updatedAt": "2024-11-27T05:48:30.985Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
