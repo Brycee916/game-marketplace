@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import UserHome from "./pages/UserHome";
 import DeveloperHome from "./pages/DeveloperHome";
-import WalletIntegration from "./pages/WalletIntegration";
 import Profile from "./pages/Profile";
 import TransactionHistory from "./pages/TransactionHistory";
 import Web3 from 'web3';
@@ -60,7 +59,6 @@ const App = () => {
         <Route path="/" element={<Login />} />
         <Route path="/user/home" element={<UserHome />} />
         <Route path="/developer/home" element={<DeveloperHome />} />
-        <Route path="/user/wallet" element={<WalletIntegration />} />
         <Route path="/user/profile" element={<Profile userType="user" walletAddress="0x123..." games={[]} />} />
         <Route path="/user/transaction-history" element={<TransactionHistory transactions={transactions} userType="user" />} />
       </Routes>
