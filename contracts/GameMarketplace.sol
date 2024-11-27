@@ -118,22 +118,20 @@ event DebugInfo(uint gameId, address caller, address currentOwner, address origi
         return (game.title, game.price, game.owner);
     }
 
-    // Function to transfer a game to another user
-    function transferGame(uint _gameId, address _newOwner) public {
-        // Ensure the new owner address is valid
-        require(_newOwner != address(0), "Invalid address");
-
-        // Retrieve the game from the mapping
+    // Function to update the price of a game
+    functin updateGamePrice(uint _gameId, uint, _newPrice) public {
+        //retrieve the game from mapping
         Game storage game = games[_gameId];
 
-        // Ensure that the sender is the current owner
-        require(game.owner == msg.sender, "You are not the owner of this game");
+        //ensure the sender is a game developer
+        require(game.creator == msg.sender, "Only developers can edit price points of games.");
 
-        // Transfer the game to the new owner
-        game.owner = _newOwner;
+        //ensure new price is valid
+        require(_newPrice > 0, "Price must be greater than 0.");
 
-        // Emit an event for the transfer
-        emit GameTransferred(_gameId, msg.sender, _newOwner);
+        //update the game's price
+        game.price = _newPrice;
+
     }
 
     // List all game titles in a user's library
