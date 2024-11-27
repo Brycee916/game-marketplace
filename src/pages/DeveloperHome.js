@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import contractABI from "../contracts/GameMarketplace.json"; 
 import { ethers } from "ethers";
 
-const contractAddress = "0xf2885Ab529Ec54E787e1d5A6CdE9AC5D4417142F"; //replace this with new contract address
+const contractAddress = "0xf2885Ab529Ec54E787e1d5A6CdE9AC5D4417142F"; // Replace with new contract address
 
 const DeveloperHome = () => {
   const [walletAddress, setWalletAddress] = useState(null);
@@ -18,7 +18,7 @@ const DeveloperHome = () => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
   const marketplaceContract = new ethers.Contract(contractAddress, contractABI.abi, signer);
-  
+
   const connectWallet = async (e) => {
     e.preventDefault();
     if (window.ethereum) {
@@ -54,17 +54,31 @@ const DeveloperHome = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    //--
     try {
-        const transaction = await marketplaceContract.addGame(game.title, ethers.utils.parseEther(game.price), game.description, game.image);
-        await transaction.wait();
-        alert(`Details of Game Posted for Sale:\nTitle: ${game.title}\nPrice: ${game.price} ETH`);
-        // Reset form fields after submission
-        setGame({title: "", price: 0, description: "", image: "", developerAddress: walletAddress,});
+      const transaction = await marketplaceContract.addGame(
+        game.title,
+        ethers.utils.parseEther(game.price),
+        game.description,
+        game.image
+      );
+      await transaction.wait();
+      alert(`Details of Game Posted for Sale:\nTitle: ${game.title}\nPrice: ${game.price} ETH`);
+      // Reset form fields after submission
+      setGame({
+        title: "",
+        price: 0,
+        description: "",
+        image: "",
+        developerAddress: walletAddress,
+      });
     } catch (error) {
-        alert(`Error Posting Game: ${game.title}`);
+      alert(`Error Posting Game: ${game.title}`);
     }
-    //--
+  };
+
+  const handleLogout = () => {
+    // Redirect to homepage
+    window.location.href = "/";
   };
 
   const styles = {
@@ -76,6 +90,7 @@ const DeveloperHome = () => {
       minHeight: "100vh",
       padding: "20px",
       fontFamily: "Arial, sans-serif",
+      position: "relative",
     },
     header: {
       fontSize: "24px",
@@ -125,13 +140,32 @@ const DeveloperHome = () => {
     buttonHover: {
       backgroundColor: "#0056b3",
     },
+    logoutButton: {
+      position: "absolute",
+      top: "20px",
+      right: "20px",
+      padding: "10px 15px",
+      backgroundColor: "#dc3545",
+      color: "#ffffff",
+      border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+      fontSize: "14px",
+    },
   };
 
   return (
     <div style={styles.container}>
+      <button
+        style={styles.logoutButton}
+        onClick={handleLogout}
+      >
+        Logout
+      </button>
+
       <h1 style={styles.header}>Developer Home</h1>
       {error && <p style={{ color: "red" }}>{error}</p>}
-      
+
       <form style={styles.form} onSubmit={handleSubmit}>
         <input
           style={styles.input}
@@ -171,13 +205,13 @@ const DeveloperHome = () => {
           onChange={handleInputChange}
           required
         />
-	<button
-	  style={{ ...styles.button2, ...styles.smallButton }}
-	  onClick={connectWallet}
-	  onMouseOver={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
-	  onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
+        <button
+          style={{ ...styles.button2, ...styles.smallButton }}
+          onClick={connectWallet}
+          onMouseOver={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
+          onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
         >
-	  Get my wallet address
+          Get my wallet address
         </button>
         <input
           style={styles.input}
@@ -205,5 +239,4 @@ const DeveloperHome = () => {
 };
 
 export default DeveloperHome;
-
 
