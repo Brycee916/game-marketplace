@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/Navbar";
 import contractABI from "../contracts/GameMarketplace.json";
 import { ethers } from "ethers";
+import { DarkModeContext } from "../contexts/DarkModeContext";
 
 const contractAddress = "0x6DBa90e8166fbA73ac66CCe38F814cf6E5350B44";
 
@@ -10,6 +11,7 @@ const TransactionHistory = ({ userType }) => {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [marketplaceContract, setMarketplaceContract] = useState(null);
+  const { isDarkMode, toggleDarkMode } = useContext(DarkModeContext);
 
   useEffect(() => {
     const setupProviderAndContract = async () => {
@@ -69,18 +71,21 @@ const TransactionHistory = ({ userType }) => {
       alignItems: "center",
       justifyContent: "center",
       minHeight: "100vh",
-      backgroundColor: "#f9f9fc",
+      backgroundColor: isDarkMode ? "#333333" : "#f9f9fc", // Medium gray for dark mode
+      color: isDarkMode ? "#ffffff" : "#000000", // White text in dark mode
       fontFamily: "Arial, sans-serif",
     },
     header: {
       fontSize: "24px",
       marginBottom: "20px",
-      color: "#333",
+      color: isDarkMode ? "#ffffff" : "#333333", // White header text in dark mode
     },
     transactionContainer: {
-      backgroundColor: "#fff",
+      backgroundColor: isDarkMode ? "#444444" : "#ffffff", // Darker background for dark mode
       borderRadius: "10px",
-      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      boxShadow: isDarkMode
+        ? "0 4px 6px rgba(0, 0, 0, 0.5)" // Softer shadow for dark mode
+        : "0 4px 6px rgba(0, 0, 0, 0.1)",
       padding: "20px",
       width: "80%",
       maxWidth: "800px",
@@ -89,29 +94,30 @@ const TransactionHistory = ({ userType }) => {
       display: "flex",
       flexDirection: "column",
       padding: "15px",
-      borderBottom: "1px solid #ddd",
+      borderBottom: isDarkMode ? "1px solid #555555" : "1px solid #ddd", // Darker border in dark mode
     },
     transactionTitle: {
       fontSize: "18px",
       fontWeight: "bold",
       marginBottom: "5px",
-      color: "#007bff",
+      color: isDarkMode ? "#90caf9" : "#007bff", // Lighter blue for dark mode
     },
     transactionDetails: {
       fontSize: "14px",
-      color: "#555",
+      color: isDarkMode ? "#bbbbbb" : "#555555", // Softer gray in dark mode
     },
     noTransactions: {
       textAlign: "center",
       fontSize: "16px",
-      color: "#999",
+      color: isDarkMode ? "#aaaaaa" : "#999999", // Softer gray for dark mode
       marginTop: "20px",
     },
   };
 
+
   return (
     <div style={styles.container}>
-      <Navbar />
+      <Navbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode}  />
       <h1 style={styles.header}>
         {userType === "developer"
           ? "Developer Transaction History"

@@ -1,11 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Navbar = () => {
+const Navbar = ({ isDarkMode, toggleDarkMode }) => {
   const styles = {
     navbar: {
       width: "100%",
-      backgroundColor: "#007bff",
+      backgroundColor: isDarkMode ? "#1c1c1c" : "#007bff",
+      color: isDarkMode ? "#fff" : "#000",
       padding: "15px 0",
       display: "flex",
       justifyContent: "space-between",
@@ -18,7 +19,7 @@ const Navbar = () => {
     },
     navbarLogo: {
       fontSize: "24px",
-      color: "#fff",
+      color: isDarkMode ? "#fff" : "#fff",
       fontWeight: "bold",
       textDecoration: "none",
       marginLeft: "20px",
@@ -32,7 +33,7 @@ const Navbar = () => {
     },
     navbarLink: {
       textDecoration: "none",
-      color: "#fff",
+      color: isDarkMode ? "#fff" : "#fff",
       fontSize: "18px",
       fontWeight: "bold",
       padding: "8px 15px",
@@ -40,10 +41,19 @@ const Navbar = () => {
       transition: "background-color 0.3s ease-in-out, transform 0.2s ease-in-out",
     },
     navbarLinkHover: {
-      backgroundColor: "#0056b3",
+      backgroundColor: isDarkMode ? "#555" : "#0056b3",
       transform: "scale(1.1)",
     },
+    toggleButton: {
+      background: "none",
+      border: "none",
+      color: isDarkMode ? "#f1c40f" : "#34495e",
+      fontSize: "24px",
+      cursor: "pointer",
+      marginRight: "20px",
+    },
   };
+
 
   return (
     <div style={styles.navbar}>
@@ -99,6 +109,10 @@ const Navbar = () => {
         >
           Log Out
         </Link>
+        {/* Dark mode toggle */}
+        <button style={styles.toggleButton} onClick={toggleDarkMode}>
+          {isDarkMode ? "☀️" : "🌙"}
+        </button>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import Profile from "./pages/Profile";
 import TransactionHistory from "./pages/TransactionHistory";
 import Web3 from 'web3';
 import { getGameMarketplaceContract } from './utils/getContract';
+import { DarkModeProvider } from "./contexts/DarkModeContext";
 
 const App = () => {
   const [account, setAccount] = useState('');
@@ -54,6 +55,7 @@ const App = () => {
   }, []);
 
   return (
+  <DarkModeProvider>
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
@@ -63,6 +65,7 @@ const App = () => {
         <Route path="/user/transaction-history" element={<TransactionHistory transactions={transactions} userType="user" />} />
       </Routes>
     </Router>
+  </DarkModeProvider>
   );
 };
 
