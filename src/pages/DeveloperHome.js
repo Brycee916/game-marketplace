@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import contractABI from "../contracts/GameMarketplace.json"; 
 import { ethers } from "ethers";
+import { DarkModeContext } from "../contexts/DarkModeContext";
 
 const contractAddress = "0x6DBa90e8166fbA73ac66CCe38F814cf6E5350B44"; //replace this with new contract address
 
 const DeveloperHome = () => {
+  const { isDarkMode, toggleDarkMode } = useContext(DarkModeContext);
   const [walletAddress, setWalletAddress] = useState(null);
   const [error, setError] = useState("");
   const [game, setGame] = useState({
@@ -86,7 +88,8 @@ const DeveloperHome = () => {
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      backgroundColor: "#f4f4f9",
+      backgroundColor: isDarkMode ? "#333333" : "#f4f4f9",
+      color: isDarkMode ? "#ffffff" : "#000000",
       minHeight: "100vh",
       padding: "20px",
       fontFamily: "Arial, sans-serif",
@@ -95,13 +98,15 @@ const DeveloperHome = () => {
     header: {
       fontSize: "24px",
       marginBottom: "20px",
-      color: "#333",
+      color: isDarkMode ? "#ffffff" : "#333333",
     },
     form: {
-      backgroundColor: "#ffffff",
+      backgroundColor: isDarkMode ? "#444444" : "#ffffff",
       padding: "30px",
       borderRadius: "10px",
-      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      boxShadow: isDarkMode
+        ? "0 4px 6px rgba(0, 0, 0, 0.5)"
+        : "0 4px 6px rgba(0, 0, 0, 0.1)",
       width: "400px",
     },
     input: {
@@ -111,11 +116,13 @@ const DeveloperHome = () => {
       borderRadius: "5px",
       border: "1px solid #ddd",
       fontSize: "16px",
+      backgroundColor: isDarkMode ? "#555555" : "#ffffff",
+      color: isDarkMode ? "#ffffff" : "#000000",
     },
     button: {
       width: "100%",
       padding: "10px",
-      backgroundColor: "#007bff",
+      backgroundColor: isDarkMode ? "#555555" : "#007bff",
       color: "#ffffff",
       border: "none",
       borderRadius: "5px",
@@ -124,7 +131,7 @@ const DeveloperHome = () => {
     },
     button2: {
       padding: "5px 10px",
-      backgroundColor: "#007bff",
+      backgroundColor: isDarkMode ? "#555555" : "#007bff",
       color: "#ffffff",
       border: "none",
       borderRadius: "5px",
@@ -132,18 +139,13 @@ const DeveloperHome = () => {
       fontSize: "14px",
       marginBottom: "15px",
     },
-    smallButton: {
-      fontSize: "14px",
-      padding: "5px 10px",
-      marginBottom: "15px",
-    },
     buttonHover: {
-      backgroundColor: "#0056b3",
+      backgroundColor: isDarkMode ? "#777777" : "#0056b3",
     },
     logoutButton: {
       position: "absolute",
       top: "20px",
-      right: "20px",
+      right: "70px",
       padding: "10px 15px",
       backgroundColor: "#dc3545",
       color: "#ffffff",
@@ -151,6 +153,16 @@ const DeveloperHome = () => {
       borderRadius: "5px",
       cursor: "pointer",
       fontSize: "14px",
+    },
+    toggleButton: {
+      position: "absolute",
+      top: "20px",
+      right: "20px",
+      backgroundColor: "transparent",
+      color: isDarkMode ? "#ffffff" : "#000000",
+      border: "none",
+      fontSize: "24px",
+      cursor: "pointer",
     },
   };
 
@@ -161,6 +173,9 @@ const DeveloperHome = () => {
         onClick={handleLogout}
       >
         Logout
+      </button>
+      <button style={styles.toggleButton} onClick={toggleDarkMode}>
+        {isDarkMode ? "☀️" : "🌙"}
       </button>
 
       <h1 style={styles.header}>Developer Home</h1>

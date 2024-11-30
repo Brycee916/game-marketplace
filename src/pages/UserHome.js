@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/Navbar";
 import contractABI from "../contracts/GameMarketplace.json";
 import { ethers } from "ethers";
+import { DarkModeContext } from "../contexts/DarkModeContext";
 
 const contractAddress = "0x6DBa90e8166fbA73ac66CCe38F814cf6E5350B44";
 
@@ -12,6 +13,7 @@ const UserHome = () => {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [marketplaceContract, setMarketplaceContract] = useState(null);
+  const { isDarkMode, toggleDarkMode } = useContext(DarkModeContext);
 
   useEffect(() => {
     const setupProviderAndContract = async () => {
@@ -93,7 +95,8 @@ const UserHome = () => {
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      backgroundColor: "#f4f4f9",
+      backgroundColor: isDarkMode ? "#333333" : "#f4f4f9", // Medium gray for page background in dark mode
+      color: isDarkMode ? "#ffffff" : "#000000", // White text in dark mode
       minHeight: "100vh",
       padding: "20px",
       fontFamily: "Arial, sans-serif",
@@ -115,10 +118,12 @@ const UserHome = () => {
       maxWidth: "1000px",
     },
     gameCard: {
-      backgroundColor: "#ffffff",
+      backgroundColor: isDarkMode ? "#444444" : "#ffffff", // Slightly lighter gray for game cards in dark mode
       width: "250px",
       borderRadius: "10px",
-      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      boxShadow: isDarkMode
+        ? "0 4px 6px rgba(0, 0, 0, 0.5)" // Softer shadow for dark mode
+        : "0 4px 6px rgba(0, 0, 0, 0.1)",
       overflow: "hidden",
       textAlign: "center",
       padding: "10px",
@@ -135,7 +140,7 @@ const UserHome = () => {
     },
     gameDescription: {
       fontSize: "14px",
-      color: "#555",
+      color: isDarkMode ? "#bbbbbb" : "#555555", // Softer gray for text in dark mode
       marginBottom: "10px",
     },
     gamePrice: {
@@ -144,7 +149,7 @@ const UserHome = () => {
       marginBottom: "10px",
     },
     purchaseButton: {
-      backgroundColor: "#007bff",
+      backgroundColor: isDarkMode ? "#555555" : "#007bff", // Button color in dark mode
       color: "#ffffff",
       padding: "10px",
       border: "none",
@@ -153,10 +158,11 @@ const UserHome = () => {
       fontSize: "14px",
     },
   };
+  
 
   return (
     <div style={styles.container}>
-      <Navbar />
+      <Navbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
       <input
         style={styles.searchBar}
         type="text"
